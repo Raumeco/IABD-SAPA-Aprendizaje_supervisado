@@ -5,13 +5,27 @@ import numpy as np
 import pandas as pd
 
 
+def pedir_fichero(retry=False):
+    try:
+        ruta_csv = input("Introduce la ruta absoluta al fichero csv que quieres analizar: " if not retry else "Introduce una ruta absoluta válida: ")
+        df = pd.read_csv(ruta_csv)
+        return df
+    except FileNotFoundError:
+        print(f"{ruta_csv} no es la ruta a un fichero csv")
+        return pedir_fichero(True)
+
+
 def main():
-    input("Introduce la ruta absoluta al fichero csv que quieres analizar: ")
+    df = pedir_fichero()
+
     ruta_modelo = Path(str(Path(__file__).resolve().parent) + '/Resultados/modelo_final_titanic.joblib').resolve()
 
     modelo_titanic = joblib.load(ruta_modelo)
 
-    modelo_titanic.predict()
+    predicciones = pd.Series(modelo_titanic.predict(df))
+    df["survived"] = predicciones
+
+    print(df)
 
 
 def sumar_columnas(data):
